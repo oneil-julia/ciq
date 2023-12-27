@@ -1,2 +1,7 @@
 bin/
 docs/
+gen/
+internal-mir/
+mir/
+DukeSampleApp.prg
+DukeSampleApp.prg.debug.xml
