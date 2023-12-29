@@ -11,7 +11,6 @@ using Toybox.System;
 
 class DeviceView extends WatchUi.View {
 
-
     private var _dataModel as DeviceDataModel;
     var yInitialOffsetPercent = 0.40f;
 
@@ -40,14 +39,14 @@ class DeviceView extends WatchUi.View {
 
         var profile = _dataModel.getActiveProfile();
         if (_dataModel.isConnected() && (profile != null)) {
-            drawCustomValue(dc, profile.getCustomArray());
+            drawCustomValue(dc, profile.getCustomDataByteArray());
         }
     }
 
     //! Draw the indicator with the given bitmap and text
     //! @param dc Device context
     //! @param data The data
-    private function drawCustomValue(dc as Dc, data as Array?) as Void {
+    private function drawCustomValue(dc as Dc, data as ByteArray?) as Void {
         var font = Graphics.FONT_SYSTEM_SMALL;
         var fontHeight = dc.getFontHeight(font);
         var yOffset = yInitialOffsetPercent * dc.getHeight() + fontHeight;
@@ -65,11 +64,12 @@ class DeviceView extends WatchUi.View {
                 var dataValuesLabel = "";
                 var HELLO_WORLD = true;
                 if (HELLO_WORLD) {
-                    // Treat the incoming data as text
-                    for (var i = 0; i < dataSize - 1; i++) {
-                        var myChar = data[i].toChar();
-                        dataValuesLabel += myChar;
-                    }
+                    var options = {
+                        :fromRepresentation => StringUtil.REPRESENTATION_BYTE_ARRAY,
+                        :toRepresentation => StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
+                        :encoding => StringUtil.CHAR_ENCODING_UTF8
+                        };
+                    dataValuesLabel = StringUtil.convertEncodedString(data, options);
                 } else {
                     // Treat in incoming data as numeric
                     for (var i = 0; i < dataSize - 1; i++) {

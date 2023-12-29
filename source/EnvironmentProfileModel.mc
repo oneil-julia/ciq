@@ -14,7 +14,7 @@ class EnvironmentProfileModel {
     private var _profileManager as ProfileManager;
     private var _pendingNotifies as Array<Characteristic>;
 
-    private var _custom_array as Array<Numeric>;
+    private var _custom_data_byte_array as ByteArray;
 
     //! Constructor
     //! @param delegate The BLE delegate for the model
@@ -28,7 +28,7 @@ class EnvironmentProfileModel {
         _service = device.getService(profileManager.DUKE_CUSTOM_SERVICE);
 
         _pendingNotifies = [] as Array<Characteristic>;
-        _custom_array = [] as Array<Numeric>;
+        _custom_data_byte_array = []b;
 
         var service = _service;
         if (service != null) {
@@ -62,10 +62,10 @@ class EnvironmentProfileModel {
         }
     }
 
-    //! Get the custom array
-    //! @return The custom array
-    public function getCustomArray() as Array? {
-        return _custom_array;
+    //! Get the custom data ByteArray
+    //! @return The custom data ByteArray
+    public function getCustomDataByteArray() as ByteArray? {
+        return _custom_data_byte_array;
     }
 
     //! Write the next notification to the descriptor
@@ -95,21 +95,9 @@ class EnvironmentProfileModel {
     //! Process and set the custom data
     //! @param data The new custom data
     private function processCustomData(data as ByteArray) as Void {
-        System.println("processCustomData(), data.size()=" + data.size() + ", _custom_array.size()=" + _custom_array.size());
-        var customArraySize = _custom_array.size();
-        for (var i = 0; i < data.size(); i++) {
-            var options = {
-                :offset => i
-            };
-            var dataValue = data.decodeNumber(Lang.NUMBER_FORMAT_UINT8, options);
-            System.println("i=" + i + ", dataValue=" + dataValue);
-            if (i >= customArraySize) {
-                _custom_array.add(dataValue);
-            } else {
-                _custom_array[i] = dataValue;
-            }
-            System.println("_custom_array[" + i + "]=" + _custom_array[i]);
-        }
+        System.println("processCustomData(), data.size()=" + data.size());
+        _custom_data_byte_array = []b;
+        _custom_data_byte_array.addAll(data);
         WatchUi.requestUpdate();
     }
 }
