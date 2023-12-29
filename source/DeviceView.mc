@@ -63,10 +63,20 @@ class DeviceView extends WatchUi.View {
             yOffset += fontHeight;
             if (dataSize > 0) {
                 var dataValuesLabel = "";
-                for (var i = 0; i < dataSize - 1; i++) {
-                    dataValuesLabel += data[i].format("%d") + ", ";
+                var HELLO_WORLD = true;
+                if (HELLO_WORLD) {
+                    // Treat the incoming data as text
+                    for (var i = 0; i < dataSize - 1; i++) {
+                        var myChar = data[i].toChar();
+                        dataValuesLabel += myChar;
+                    }
+                } else {
+                    // Treat in incoming data as numeric
+                    for (var i = 0; i < dataSize - 1; i++) {
+                        dataValuesLabel += data[i].format("%d") + ", ";
+                    }
+                    dataValuesLabel += data[dataSize - 1].format("%d");
                 }
-                dataValuesLabel += data[dataSize - 1].format("%d");
                 dc.drawText(dc.getWidth() / 2, yOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
             }
         }
