@@ -14,6 +14,7 @@ import Toybox.WatchUi;
 class ScanDataModel {
     private var _displayResult as Number;
     private var _scanResults as Array<ScanResult>;
+    private var _scanState as BluetoothLowEnergy.ScanState = BluetoothLowEnergy.SCAN_STATE_OFF;
 
     //! Constructor
     //! @param bleDelegate The BLE delegate for this model
@@ -87,5 +88,17 @@ class ScanDataModel {
     //! @return The number of scan results
     public function getResultCount() as Number {
         return _scanResults.size();
+    }
+
+    //! Update display to the new scan state
+    public function setScanState(scanState as BluetoothLowEnergy.ScanState) as Void {
+        _scanState = scanState;
+        WatchUi.requestUpdate();
+    }
+
+    //! Get whether the watch is scanning
+    //! @return true if scanning, false otherwise
+    public function isScanning() as Boolean {
+        return _scanState == BluetoothLowEnergy.SCAN_STATE_SCANNING;
     }
 }

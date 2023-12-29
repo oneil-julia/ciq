@@ -13,7 +13,7 @@ class DeviceView extends WatchUi.View {
 
 
     private var _dataModel as DeviceDataModel;
-    var yInitialOffset = 15;
+    var yInitialOffsetPercent = 0.40f;
 
     //! Constructor
     //! @param dataModel The data to show
@@ -30,13 +30,13 @@ class DeviceView extends WatchUi.View {
         if (_dataModel.isConnected()) {
             statusString = "Connected";
         } else {
-            statusString = "Disconnected";
+            statusString = "Waiting for\nConnection...";
         }
 
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
 
-        dc.drawText(dc.getWidth() / 2, yInitialOffset, Graphics.FONT_SMALL, statusString, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(dc.getWidth() / 2, yInitialOffsetPercent * dc.getHeight(), Graphics.FONT_MEDIUM, statusString, Graphics.TEXT_JUSTIFY_CENTER);
 
         var profile = _dataModel.getActiveProfile();
         if (_dataModel.isConnected() && (profile != null)) {
@@ -50,7 +50,7 @@ class DeviceView extends WatchUi.View {
     private function drawCustomValue(dc as Dc, data as Array?) as Void {
         var font = Graphics.FONT_SYSTEM_SMALL;
         var fontHeight = dc.getFontHeight(font);
-        var yOffset = yInitialOffset + fontHeight;
+        var yOffset = yInitialOffsetPercent * dc.getHeight() + fontHeight;
 
         if (data == null) {
             System.println("drawCustomValue(), null data");

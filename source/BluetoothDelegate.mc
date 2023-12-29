@@ -99,6 +99,15 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
         _onCharChanged = model.weak();
     }
 
+    public function onScanStateChange(scanState as BluetoothLowEnergy.ScanState, status as BluetoothLowEnergy.Status) as Void {
+        var onScanResult = _onScanResult;
+        if (null != onScanResult) {
+            if (onScanResult.stillAlive()) {
+                (onScanResult.get() as ScanDataModel).setScanState(scanState);
+            }
+        }
+    }
+
     //! Broadcast a new scan result
     //! @param scanResult The new scan result
     private function broadcastScanResult(scanResult as ScanResult) as Void {

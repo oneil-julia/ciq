@@ -25,7 +25,7 @@ class ViewController {
         return [new $.ScanView(scanDataModel), new $.ScanDelegate(scanDataModel, self)] as Array<ScanView or ScanDelegate>;
     }
 
-    //! Push the scan menu view
+    //! Push the scan menu view (hold menu button to push this view)
     public function pushScanMenu() as Void {
         WatchUi.pushView(new $.Rez.Menus.MainMenu(), new $.ScanMenuDelegate(), WatchUi.SLIDE_UP);
     }

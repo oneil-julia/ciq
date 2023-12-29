@@ -37,21 +37,24 @@ class ScanView extends WatchUi.View {
     public function onUpdate(dc as Dc) as Void {
         var displayResult = _scanDataModel.getDisplayResult();
 
-        var title = "BLE Scan Results";
-        var str = "Device: " + _scanDataModel.getDisplayIndex() + "/" + _scanDataModel.getResultCount();
+        var title = "BLE Scan\nResults";
+        var subtext = "";
 
         if (null != displayResult) {
-            str += "\nName:\n" + displayResult.getDeviceName() + "\nRSSI: " + displayResult.getRssi() + " dbm";
+            subtext = "Tap to Connect\nDevice: " + _scanDataModel.getDisplayIndex() + "/" + _scanDataModel.getResultCount() + "\nName:" + displayResult.getDeviceName() + "\nRSSI: " + displayResult.getRssi() + " dbm";
+        } else if (_scanDataModel.isScanning()) {
+            subtext = "Scanning...";
+        } else {
+            subtext = "Hold Menu Button\nto View Scan Menu";
         }
 
         var strDimenTitle = dc.getTextDimensions(title, Graphics.FONT_MEDIUM);
-        var yOffset = dc.getHeight() / 2;
-        yOffset -= strDimenTitle[1] / 2;
+        var yOffset = dc.getHeight() * 0.10f;
 
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
         dc.drawText(dc.getWidth() / 2, yOffset, Graphics.FONT_MEDIUM, title, Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(dc.getWidth() / 2, yOffset + strDimenTitle[1], Graphics.FONT_SMALL, str, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(dc.getWidth() / 2, yOffset + strDimenTitle[1], Graphics.FONT_SMALL, subtext, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
     //! Called when this View is removed from the screen. Save the
