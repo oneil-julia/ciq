@@ -29,7 +29,7 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
         System.println("onScanResults");
         for (var result = scanResults.next(); result != null; result = scanResults.next()) {
             if (result instanceof ScanResult) {
-                System.println("Result is a scan result!" + result.getDeviceName());
+                System.println("Result is a scan result  " + result.getDeviceName());
                 if (contains(result.getServiceUuids(), _profileManager.DUKE_CUSTOM_SERVICE)) {
                     System.println("Found custom service, calling broadcast");
                     broadcastScanResult(result);
