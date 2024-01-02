@@ -26,7 +26,7 @@ class ProfileManager {
     //                32-byte Base UUID = f364adc9-00b0-4240-ba50-05ca45bf8abc
     //       4-byte Characteristic UUID =     1402
     //      32-byte Characteristic UUID = f3641402-00b0-4240-ba50-05ca45bf8abc
-    public const DUKE_LED_CHARACTERISTIC = BluetoothLowEnergy.stringToUuid("f3641402-00b0-4240-ba50-05ca45bf8abc");
+    public const DUKE_GPIO_CHARACTERISTIC = BluetoothLowEnergy.stringToUuid("f3641402-00b0-4240-ba50-05ca45bf8abc");
 
         private const _envProfileDef = {
             :uuid => DUKE_CUSTOM_SERVICE,
@@ -36,7 +36,7 @@ class ProfileManager {
                 :descriptors => [BluetoothLowEnergy.cccdUuid()]
                 },
                 {
-                :uuid => DUKE_LED_CHARACTERISTIC,
+                :uuid => DUKE_GPIO_CHARACTERISTIC,
                 :descriptors => [BluetoothLowEnergy.cccdUuid()]
                 }]
         };

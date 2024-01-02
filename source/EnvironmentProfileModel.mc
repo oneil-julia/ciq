@@ -13,10 +13,10 @@ class EnvironmentProfileModel {
     private var _service as Service?;
     private var _profileManager as ProfileManager;
     private var _pendingNotifies as Array<Characteristic>;
-    private var _LedCharacteristic as Characteristic;
+    private var _GpioCharacteristic as Characteristic;
 
     private var _custom_data_byte_array as ByteArray;
-    private var _led_data_byte_array as ByteArray;
+    private var _gpio_data_byte_array as ByteArray;
 
     //! Constructor
     //! @param delegate The BLE delegate for the model
@@ -28,11 +28,11 @@ class EnvironmentProfileModel {
 
         _profileManager = profileManager;
         _service = device.getService(profileManager.DUKE_CUSTOM_SERVICE);
-        _LedCharacteristic = _service.getCharacteristic(_profileManager.DUKE_LED_CHARACTERISTIC);
+        _GpioCharacteristic = _service.getCharacteristic(_profileManager.DUKE_GPIO_CHARACTERISTIC);
 
         _pendingNotifies = [] as Array<Characteristic>;
         _custom_data_byte_array = []b;
-        _led_data_byte_array = []b;
+        _gpio_data_byte_array = []b;
 
         var service = _service;
         if (service != null) {
@@ -56,8 +56,8 @@ class EnvironmentProfileModel {
                 System.println("onCharacteristicChanged(), DUKE_CUSTOM_CHARACTERISTIC, data.size()=" + data.size());
                 processCustomData(data);
                 break;
-            case _profileManager.DUKE_LED_CHARACTERISTIC:
-                System.println("onCharacteristicChanged(), DUKE_LED_CHARACTERISTIC, data.size()=" + data.size());
+            case _profileManager.DUKE_GPIO_CHARACTERISTIC:
+                System.println("onCharacteristicChanged(), DUKE_GPIO_CHARACTERISTIC, data.size()=" + data.size());
                 processLedData(data);
                 break;
         }
@@ -81,20 +81,20 @@ class EnvironmentProfileModel {
         return null;
     }
 
-    //! Get the custom data ByteArray
-    //! @return The custom data ByteArray
-    public function getLedDataByteArray() as ByteArray? {
-        if (_led_data_byte_array.size() > 0) {
-            return _led_data_byte_array;
+    //! Get the custom GPIO data ByteArray
+    //! @return The custom GPIO data ByteArray
+    public function getGpioDataByteArray() as ByteArray? {
+        if (_gpio_data_byte_array.size() > 0) {
+            return _gpio_data_byte_array;
         }
         return null;
     }
 
-    public function writeLedDataByteArray(ledDataByteArray as ByteArray) as Void {
-        System.println("writeLedDataByteArray(" + ledDataByteArray + ")");
-        if (ledDataByteArray != null && ledDataByteArray.size() > 0) {
-            _led_data_byte_array = []b;
-            _LedCharacteristic.requestWrite(ledDataByteArray, {:writeType=>BluetoothLowEnergy.WRITE_TYPE_DEFAULT});
+    public function writeGpioDataByteArray(writeGpioDataByteArray as ByteArray) as Void {
+        System.println("writeGpioDataByteArray(" + writeGpioDataByteArray + ")");
+        if (writeGpioDataByteArray != null && writeGpioDataByteArray.size() > 0) {
+            _gpio_data_byte_array = []b;
+            _GpioCharacteristic.requestWrite(writeGpioDataByteArray, {:writeType=>BluetoothLowEnergy.WRITE_TYPE_DEFAULT});
         }
     }
 
@@ -138,8 +138,8 @@ class EnvironmentProfileModel {
     //! @param data The new custom data
     private function processLedData(data as ByteArray) as Void {
         System.println("processLedData(), data.size()=" + data.size());
-        _led_data_byte_array = []b;
-        _led_data_byte_array.addAll(data);
+        _gpio_data_byte_array = []b;
+        _gpio_data_byte_array.addAll(data);
         WatchUi.requestUpdate();
     }
 }
