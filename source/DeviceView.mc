@@ -18,40 +18,50 @@ class DeviceView extends WatchUi.View {
 	LED_STATE_COUNT
     }
 
-    private var _dataModel as DeviceDataModel;
-    private var yInitialOffsetPercent = 0.40f;
+    private var InitialYOffsetPercent = 0.17f;
+    private var LedButtonDimensionsPercent = 0.23f;
+    private var LedButtonPaddingPercent = 0.05f;
     private var LedDataExpectedSize = 1;
-    private var Led4index = 0;
-    private var _led4state;
+    private var Led4DataIndex = 0;
+
+    private var mDataModel as DeviceDataModel;
+    private var mLed4State as Number;
+    private var mYOffset as Number;
+    private var mLedButtonPosition as Array<Number>;  // x, y, width, height
 
     //! Constructor
     //! @param dataModel The data to show
     public function initialize(dataModel as DeviceDataModel) {
         View.initialize();
 
-        _dataModel = dataModel;
-        _led4state = LED_STATE_OFF;
+        mDataModel = dataModel;
+        mLed4State = LED_STATE_OFF;
+        mYOffset = 0;
+        mLedButtonPosition = [0, 0, 0, 0];
     }
 
     //! Update the view
     //! @param dc Device Context
     public function onUpdate(dc as Dc) as Void {
         System.println("onUpdate()");
+
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
+
+        var isConnected = mDataModel.isConnected();
         var statusString;
-        if (_dataModel.isConnected()) {
+        if (isConnected) {
             statusString = "Connected";
         } else {
             statusString = "Waiting for\nConnection...";
         }
 
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-        dc.clear();
+        dc.drawText(dc.getWidth() / 2, InitialYOffsetPercent * dc.getHeight(), Graphics.FONT_MEDIUM, statusString, Graphics.TEXT_JUSTIFY_CENTER);
 
-        dc.drawText(dc.getWidth() / 2, yInitialOffsetPercent * dc.getHeight(), Graphics.FONT_MEDIUM, statusString, Graphics.TEXT_JUSTIFY_CENTER);
-
-        var profile = _dataModel.getActiveProfile();
-        if (_dataModel.isConnected() && (profile != null)) {
+        var profile = mDataModel.getActiveProfile();
+        if (isConnected && (profile != null)) {
             drawProfileData(dc, profile.getCustomDataByteArray(), profile.getLedDataByteArray());
+            drawLedButton(dc);
         }
     }
 
@@ -63,14 +73,14 @@ class DeviceView extends WatchUi.View {
         System.println("drawCustomValue()");
         var font = Graphics.FONT_SYSTEM_SMALL;
         var fontHeight = dc.getFontHeight(font);
-        var yOffset = yInitialOffsetPercent * dc.getHeight() + fontHeight;
+        mYOffset = InitialYOffsetPercent * dc.getHeight() + fontHeight;
 
         if (customData != null) {
             var dataSize = customData.size();
             System.println("  customData.size() " + dataSize);
             var dataSizeLabel = "dataSize: " + dataSize.toString();
-            dc.drawText(dc.getWidth() / 2, yOffset, font, dataSizeLabel, Graphics.TEXT_JUSTIFY_CENTER);
-            yOffset += fontHeight;
+            dc.drawText(dc.getWidth() / 2, mYOffset, font, dataSizeLabel, Graphics.TEXT_JUSTIFY_CENTER);
+            mYOffset += fontHeight;
             if (dataSize > 0) {
                 var dataValuesLabel = "";
                 var HELLO_WORLD = true;
@@ -90,8 +100,19 @@ class DeviceView extends WatchUi.View {
                     dataValuesLabel += customData[dataSize - 1].format("%d");
                 }
                 System.println("  dataValuesLabel " + dataValuesLabel);
-                dc.drawText(dc.getWidth() / 2, yOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
-                yOffset += fontHeight;
+                dc.drawText(dc.getWidth() / 2, mYOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
+                mYOffset += fontHeight;
+                if (mLedButtonPosition[0] == 0) {
+                    // LED button position hasn't been set so do that now
+                    var screenWidth = dc.getWidth();
+                    var screenHeight = dc.getHeight();
+                    mYOffset += LedButtonPaddingPercent * screenHeight;
+                    mLedButtonPosition[2] = LedButtonDimensionsPercent * screenWidth;  // width
+                    mLedButtonPosition[3] = LedButtonDimensionsPercent * screenHeight;  // height
+                    mLedButtonPosition[0] = (screenWidth - mLedButtonPosition[2]) / 2;  // x
+                    mLedButtonPosition[1] = mYOffset;  // y
+                    mYOffset += mLedButtonPosition[3];
+                }
             }
         }
 
@@ -103,14 +124,42 @@ class DeviceView extends WatchUi.View {
                     System.println("  Warning: ledData.size() " + ledDataSize + ", expected " + LedDataExpectedSize);
                 }
                 
-                var led4Data = ledData[Led4index];
+                var led4Data = ledData[Led4DataIndex];
                 if (led4Data < LED_STATE_COUNT) {
-                    _led4state = led4Data;
-                    System.println("  _led4state " + _led4state);
+                    mLed4State = led4Data;
+                    System.println("  mLed4State " + mLed4State);
                 } else {
                     System.println("  unsupported state led4Data  " + led4Data);
                 }
             }
+        }
+    }
+
+    public function drawLedButton(dc as Dc) as Void {
+        System.println("drawLedButton(), mLed4State: " + mLed4State);
+        dc.setColor(
+            mLed4State == LED_STATE_OFF ? Graphics.COLOR_LT_GRAY : Graphics.COLOR_YELLOW,
+            Graphics.COLOR_BLACK
+        );
+        dc.fillRectangle(
+            mLedButtonPosition[0],
+            mLedButtonPosition[1],
+            mLedButtonPosition[2],
+            mLedButtonPosition[3]
+        );
+    }
+
+    // Using a Selectable / Button Type would be better, but this will work as a hacky solution for now.
+    public function onTapEvent(x as Number, y as Number) as Void {
+        System.println("onTapEvent()");
+        if (x >= mLedButtonPosition[0] && x <= mLedButtonPosition[0] + mLedButtonPosition[2] &&
+            y >= mLedButtonPosition[1] && y <= mLedButtonPosition[1] + mLedButtonPosition[3]) {
+            mLed4State = mLed4State == LED_STATE_OFF ? LED_STATE_ON : LED_STATE_OFF;
+            System.println("  new mLed4State: " + mLed4State);
+            var profile = mDataModel.getActiveProfile();
+            profile.writeLedDataByteArray([mLed4State]b);
+
+            WatchUi.requestUpdate();
         }
     }
 }

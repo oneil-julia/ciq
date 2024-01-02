@@ -9,13 +9,15 @@ import Toybox.WatchUi;
 
 class DeviceDelegate extends WatchUi.BehaviorDelegate {
     private var _deviceDataModel as DeviceDataModel;
+    private var _parentView as DeviceView;
 
     //! Constructor
     //! @param deviceDataModel The device data model
-    public function initialize(deviceDataModel as DeviceDataModel) {
+    public function initialize(deviceDataModel as DeviceDataModel, parentView as DeviceView) {
         BehaviorDelegate.initialize();
 
         _deviceDataModel = deviceDataModel;
+        _parentView = parentView;
         _deviceDataModel.pair();
     }
 
@@ -26,4 +28,14 @@ class DeviceDelegate extends WatchUi.BehaviorDelegate {
         WatchUi.popView(WatchUi.SLIDE_DOWN);
         return true;
     }
+
+    public function onTap(clickEvent as ClickEvent) as Boolean {
+        var coords = clickEvent.getCoordinates();
+        if (coords.size() == 2) {
+            System.println("onTap: " + coords[0] + "," + coords[1]);
+           _parentView.onTapEvent(coords[0], coords[1]);
+        }
+        return true;
+    }
 }
+

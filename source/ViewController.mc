@@ -34,7 +34,8 @@ class ViewController {
     //! @param scanResult The scan result for the device view to push
     public function pushDeviceView(scanResult as ScanResult) as Void {
         var deviceDataModel = _modelFactory.getDeviceDataModel(scanResult);
+        var deviceView = new $.DeviceView(deviceDataModel);
 
-        WatchUi.pushView(new $.DeviceView(deviceDataModel), new $.DeviceDelegate(deviceDataModel), WatchUi.SLIDE_UP);
+        WatchUi.pushView(deviceView, new $.DeviceDelegate(deviceDataModel, deviceView), WatchUi.SLIDE_UP);
     }
 }

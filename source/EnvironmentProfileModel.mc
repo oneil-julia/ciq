@@ -13,6 +13,7 @@ class EnvironmentProfileModel {
     private var _service as Service?;
     private var _profileManager as ProfileManager;
     private var _pendingNotifies as Array<Characteristic>;
+    private var _LedCharacteristic as Characteristic;
 
     private var _custom_data_byte_array as ByteArray;
     private var _led_data_byte_array as ByteArray;
@@ -27,6 +28,7 @@ class EnvironmentProfileModel {
 
         _profileManager = profileManager;
         _service = device.getService(profileManager.DUKE_CUSTOM_SERVICE);
+        _LedCharacteristic = _service.getCharacteristic(_profileManager.DUKE_LED_CHARACTERISTIC);
 
         _pendingNotifies = [] as Array<Characteristic>;
         _custom_data_byte_array = []b;
@@ -86,6 +88,14 @@ class EnvironmentProfileModel {
             return _led_data_byte_array;
         }
         return null;
+    }
+
+    public function writeLedDataByteArray(ledDataByteArray as ByteArray) as Void {
+        System.println("writeLedDataByteArray(" + ledDataByteArray + ")");
+        if (ledDataByteArray != null && ledDataByteArray.size() > 0) {
+            _led_data_byte_array = []b;
+            _LedCharacteristic.requestWrite(ledDataByteArray, {:writeType=>BluetoothLowEnergy.WRITE_TYPE_DEFAULT});
+        }
     }
 
     //! Write the next notification to the descriptor
