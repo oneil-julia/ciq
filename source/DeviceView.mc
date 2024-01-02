@@ -93,11 +93,13 @@ class DeviceView extends WatchUi.View {
                         };
                     dataValuesLabel = StringUtil.convertEncodedString(customData, options);
                 } else {
-                    // Treat in incoming customData as numeric
-                    for (var i = 0; i < dataSize - 1; i++) {
-                        dataValuesLabel += customData[i].format("%d") + ", ";
+                    // Treat in incoming customData as numeric, only print the first few
+                    var MAX_DISPLAY_COUNT = 5;
+                    var displayCount = dataSize > MAX_DISPLAY_COUNT ? MAX_DISPLAY_COUNT - 1 : dataSize - 1;
+                    for (var i = 0; i < displayCount; i++) {
+                        dataValuesLabel += customData[i].format("%3d") + ",";
                     }
-                    dataValuesLabel += customData[dataSize - 1].format("%d");
+                    dataValuesLabel += customData[displayCount].format("%3d");
                 }
                 System.println("  dataValuesLabel " + dataValuesLabel);
                 dc.drawText(dc.getWidth() / 2, mYOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
