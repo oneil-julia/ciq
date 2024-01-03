@@ -1,12 +1,14 @@
 # Duke Project Example - Connect IQ App
+> [!WARNING]
+> Be sure to complete the [nRF_CustomBleProfile guide](https://github.com/4djelliot/nRF_CustomBleProfile) prior to cloning this repo, since we recommend cloning this repo into a new _DukeSampleApp_ folder in your Connect IQ SDK's _samples_ folder.
 
-Install the Garmin Monkey C Extension:
-Name: Monkey C
-Id: Garmin.monkey-c
-Description: Monkey C Language Support
-Version: 1.0.10
-Publisher: Garmin
-VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=garmin.monkey-c
+## Install the Garmin Monkey C Extension
+* **Name**: Monkey C
+* **Id**: Garmin.monkey-c
+* **Description**: Monkey C Language Support
+* **Version**: 1.0.10
+* **Publisher**: Garmin
+* **VS Marketplace Link**: https://marketplace.visualstudio.com/items?itemName=garmin.monkey-c
 
 
 Once you open the CIQ project in Studio Code, you may encounter errors when trying to execute Monkey C commands such as:
