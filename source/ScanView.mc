@@ -40,12 +40,12 @@ class ScanView extends WatchUi.View {
         var title = "BLE Scan\nResults";
         var subtext = "";
 
-        if (null != displayResult) {
-            subtext = "Tap to Connect\nDevice: " + _scanDataModel.getDisplayIndex() + "/" + _scanDataModel.getResultCount() + "\nName:" + displayResult.getDeviceName() + "\nRSSI: " + displayResult.getRssi() + " dbm";
-        } else if (_scanDataModel.isScanning()) {
-            subtext = "Scanning...";
-        } else {
+        if(!_scanDataModel.isScanning()) {
             subtext = "Hold Menu Button\nto View Scan Menu";
+        } else if (null != displayResult) {
+            subtext = "Tap to Connect\nDevice: " + _scanDataModel.getDisplayIndex() + "/" + _scanDataModel.getResultCount() + "\nName:" + displayResult.getDeviceName() + "\nRSSI: " + displayResult.getRssi() + " dbm";
+        } else {
+            subtext = "Scanning...";
         }
 
         var strDimenTitle = dc.getTextDimensions(title, Graphics.FONT_MEDIUM);
