@@ -11,24 +11,39 @@ using Toybox.System;
 
 class DeviceView extends WatchUi.View {
 
+    // These probably belong in Profile manager or model
+    static enum {
+        GPIO_PAYLOAD_INDEX_LED4 = 0,
+        GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT = 1,
+        GPIO_PAYLOAD_INDEX_GPIO12_INPUT = 2,
+	
+	GPIO_PAYLOAD_SIZE_BYTES
+    }
+
     static enum {
         LED_STATE_OFF = 0,
         LED_STATE_ON = 1,
 	
-	LED_STATE_COUNT
+	LED_STATE_COUNT,
+    }
+
+    static enum {
+        GPIO_STATE_CLEARED = 0,
+        GPIO_STATE_SET = 1,
+	
+	GPIO_STATE_COUNT
     }
 
     private var InitialYOffsetPercent = 0.12f;
     private var ButtonDimensionsPercent = 0.23f;
     private var ButtonXPaddingPercent = 0.07f;
-    private var ButtonYPaddingPercent = 0.05f;
-    private var LedDataExpectedSize = 1;
-    private var Led4DataIndex = 0;
+    private var ButtonYPaddingPercent = 0.04f;
+    private var GpioDataExpectedSize = 1;
 
     private var mDataModel as DeviceDataModel;
-    private var mLed4State as Number;
+    private var mGpioDataByteArray as ByteArray;
     private var mYOffset as Number;
-    private var buttonPositionsSet as Boolean;
+    private var mButtonPositionsSet as Boolean;
     private var mLedButtonPosition as Array<Number>;  // x, y, width, height
     private var mGpio11ButtonPosition as Array<Number>;  // x, y, width, height
 
@@ -38,9 +53,9 @@ class DeviceView extends WatchUi.View {
         View.initialize();
 
         mDataModel = dataModel;
-        mLed4State = LED_STATE_OFF;
+        mGpioDataByteArray = [LED_STATE_OFF, GPIO_STATE_CLEARED, GPIO_STATE_SET]b;
         mYOffset = 0;
-        buttonPositionsSet = false;
+        mButtonPositionsSet = false;
         mLedButtonPosition = [0, 0, 0, 0];
         mGpio11ButtonPosition = [0, 0, 0, 0];
     }
@@ -61,33 +76,33 @@ class DeviceView extends WatchUi.View {
             statusString = "Waiting for\nConnection...";
         }
 
+        mYOffset = InitialYOffsetPercent * dc.getHeight();
         dc.drawText(dc.getWidth() / 2, InitialYOffsetPercent * dc.getHeight(), Graphics.FONT_MEDIUM, statusString, Graphics.TEXT_JUSTIFY_CENTER);
+        mYOffset += dc.getFontHeight(Graphics.FONT_MEDIUM);
 
         var profile = mDataModel.getActiveProfile();
         if (isConnected && (profile != null)) {
-            drawProfileData(dc, profile.getCustomDataByteArray(), profile.getGpioDataByteArray());
-            drawButtons(dc);
+            drawCustomData(dc, profile.getCustomDataByteArray());
+            var gpioData = profile.getGpioDataByteArray();
+            storeGpioData(gpioData);
+            if (gpioData != null and gpioData.size() > 0) {
+                drawButtons(dc);
+                drawInputGpioText(dc);
+            }
         }
     }
 
     //! Update the screen with the data received
     //! @param dc Device context
     //! @param customData The custom data
-    //! @param gpioData The LED data
-    private function drawProfileData(dc as Dc, customData as ByteArray?, gpioData as ByteArray?) as Void {
+    private function drawCustomData(dc as Dc, customData as ByteArray?) as Void {
         System.println("drawCustomValue()");
-        var font = Graphics.FONT_SYSTEM_SMALL;
-        var fontHeight = dc.getFontHeight(font);
-        mYOffset = InitialYOffsetPercent * dc.getHeight() + fontHeight;
-
+        
         if (customData != null) {
+            var font = Graphics.FONT_SYSTEM_SMALL;
             var dataSize = customData.size();
-            System.println("  customData.size() " + dataSize);
-            var dataSizeLabel = "dataSize: " + dataSize.toString();
-            dc.drawText(dc.getWidth() / 2, mYOffset, font, dataSizeLabel, Graphics.TEXT_JUSTIFY_CENTER);
-            mYOffset += fontHeight;
+            var dataValuesLabel = "";
             if (dataSize > 0) {
-                var dataValuesLabel = "";
                 var HELLO_WORLD = true;
                 if (HELLO_WORLD) {
                     // Treat incoming customData as text
@@ -106,37 +121,66 @@ class DeviceView extends WatchUi.View {
                     }
                     dataValuesLabel += customData[displayCount].format("%3d");
                 }
-                System.println("  dataValuesLabel " + dataValuesLabel);
-                dc.drawText(dc.getWidth() / 2, mYOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
-                mYOffset += fontHeight;
-                setButtonPositions(dc);  // Needs to happen after the custom data has been drawn the first time
             }
-        }
+            System.println("  dataValuesLabel " + dataValuesLabel);
+            dc.drawText(dc.getWidth() / 2, mYOffset, font, dataValuesLabel, Graphics.TEXT_JUSTIFY_CENTER);
+            mYOffset += dc.getFontHeight(font);
 
+            System.println("  customData.size() " + dataSize);
+            var dataSizeLabel = "dataSize: " + dataSize.toString();
+            font = Graphics.FONT_SYSTEM_XTINY;
+            dc.drawText(dc.getWidth() / 2, mYOffset, font, dataSizeLabel, Graphics.TEXT_JUSTIFY_CENTER);
+            mYOffset += dc.getFontHeight(font);
+
+            setButtonPositions(dc);  // Needs to happen after the custom data has been drawn the first time
+        }
+    }
+
+    //! @param gpioData The GPIO data
+    private function storeGpioData(gpioData as ByteArray?) as Void {
         if (gpioData != null) {
-            var ledDataSize = gpioData.size();
-            if (ledDataSize > 0) {
-                System.println("  gpioData.size() " + ledDataSize);
-                if (LedDataExpectedSize != ledDataSize) {
-                    System.println("  Warning: gpioData.size() " + ledDataSize + ", expected " + LedDataExpectedSize);
+            // Nothing is printed to the screen, just variables stored and debug prints
+            var gpioDataSize = gpioData.size();
+            if (gpioDataSize > 0) {
+                System.println("  gpioData.size() " + gpioDataSize);
+                if (GpioDataExpectedSize == gpioDataSize) {
+                    System.println("  " + gpioData);
+                } else {
+                    System.println("  Warning: gpioData.size() " + gpioDataSize + ", expected " + GpioDataExpectedSize);
                 }
                 
-                var led4Data = gpioData[Led4DataIndex];
-                if (led4Data < LED_STATE_COUNT) {
-                    mLed4State = led4Data;
-                    System.println("  mLed4State " + mLed4State);
+                if (gpioData[GPIO_PAYLOAD_INDEX_LED4] < LED_STATE_COUNT) {
+                    mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]
+                        = gpioData[GPIO_PAYLOAD_INDEX_LED4];
                 } else {
-                    System.println("  unsupported state led4Data  " + led4Data);
+                    System.println("unsupported state gpioData[GPIO_PAYLOAD_INDEX_LED4] "
+                        + gpioData[GPIO_PAYLOAD_INDEX_LED4]);
+                }
+
+                if (gpioData[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT] < GPIO_STATE_COUNT) {
+                    mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]
+                        = gpioData[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT];
+                } else {
+                    System.println("unsupported state gpioData[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT] "
+                        + gpioData[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]);
+                }
+
+                if (gpioData[GPIO_PAYLOAD_INDEX_GPIO12_INPUT] < GPIO_STATE_COUNT) {
+                    mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO12_INPUT]
+                        = gpioData[GPIO_PAYLOAD_INDEX_GPIO12_INPUT];
+                } else {
+                    System.println("unsupported state gpioData[GPIO_PAYLOAD_INDEX_GPIO12_INPUT] "
+                        + gpioData[GPIO_PAYLOAD_INDEX_GPIO12_INPUT]);
                 }
             }
         }
     }
 
     public function drawButtons(dc as Dc) as Void {
-        System.println("drawButtons(), mLed4State: " + mLed4State);
+        System.println("drawButtons(), mGpioDataByteArray: " + mGpioDataByteArray);
 
         dc.setColor(
-            mLed4State == LED_STATE_OFF ? Graphics.COLOR_LT_GRAY : Graphics.COLOR_YELLOW,
+            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4] == LED_STATE_OFF ? Graphics.COLOR_LT_GRAY : Graphics.COLOR_YELLOW,
             Graphics.COLOR_BLACK
         );
         dc.fillRectangle(
@@ -147,7 +191,7 @@ class DeviceView extends WatchUi.View {
         );
 
         dc.setColor(
-            Graphics.COLOR_GREEN,
+            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT] == GPIO_STATE_CLEARED ? Graphics.COLOR_LT_GRAY : Graphics.COLOR_YELLOW,
             Graphics.COLOR_BLACK
         );
         dc.fillRectangle(
@@ -164,10 +208,25 @@ class DeviceView extends WatchUi.View {
         var buttonYCenter = mLedButtonPosition[1] + mLedButtonPosition[3] / 2 - dc.getFontHeight(font) / 2;
         dc.drawText(ledButtonXCenter, buttonYCenter, font, "LED_4", Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(gpio11ButtonXCenter, buttonYCenter, font, "GPIO_11", Graphics.TEXT_JUSTIFY_CENTER);
+
+        mYOffset = mGpio11ButtonPosition[1] + mGpio11ButtonPosition[3] + ButtonYPaddingPercent * dc.getHeight();
+    }
+
+    public function drawInputGpioText(dc as Dc) as Void {
+        var screenCenter = dc.getWidth() / 2;
+        var font = Graphics.FONT_SYSTEM_XTINY;
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.drawText(screenCenter, mYOffset, font, "GPIO 12 is:", Graphics.TEXT_JUSTIFY_CENTER);
+        mYOffset += dc.getFontHeight(font);
+        var isGpioSet = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO12_INPUT] == GPIO_STATE_SET;
+        var textGpio12 = isGpioSet ? "SET" : "CLEARED";
+        dc.setColor(isGpioSet ? Graphics.COLOR_YELLOW : Graphics.COLOR_LT_GRAY, Graphics.COLOR_BLACK);
+        dc.drawText(screenCenter, mYOffset, font, textGpio12, Graphics.TEXT_JUSTIFY_CENTER);
+        mYOffset += dc.getFontHeight(font);
     }
 
     private function setButtonPositions(dc as Dc) as Void {
-        if (!buttonPositionsSet) {
+        if (!mButtonPositionsSet) {
             var screenWidth = dc.getWidth();
             var screenXCenter = screenWidth / 2;
             var screenHeight = dc.getHeight();
@@ -183,20 +242,38 @@ class DeviceView extends WatchUi.View {
             mGpio11ButtonPosition[0] = screenXCenter + buttonXPadding;  // x
             mGpio11ButtonPosition[1] = mYOffset;  // y
 
-            mYOffset += mLedButtonPosition[3];
-            buttonPositionsSet = true;
+            mButtonPositionsSet = true;
         }
     }
 
     // Using a Selectable / Button Type would be better, but this will work as a hacky solution for now.
     public function onTapEvent(x as Number, y as Number) as Void {
         System.println("onTapEvent()");
+        var gpioDataUpdated = false;
+
         if (x >= mLedButtonPosition[0] && x <= mLedButtonPosition[0] + mLedButtonPosition[2] &&
             y >= mLedButtonPosition[1] && y <= mLedButtonPosition[1] + mLedButtonPosition[3]) {
-            mLed4State = mLed4State == LED_STATE_OFF ? LED_STATE_ON : LED_STATE_OFF;
-            System.println("  new mLed4State: " + mLed4State);
+            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]
+                = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4] == LED_STATE_OFF
+                ? LED_STATE_ON : LED_STATE_OFF;
+            System.println("  new mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]: " + mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]);
+            gpioDataUpdated = true;
+        }
+
+        if (x >= mGpio11ButtonPosition[0] && x <= mGpio11ButtonPosition[0] + mGpio11ButtonPosition[2] &&
+            y >= mGpio11ButtonPosition[1] && y <= mGpio11ButtonPosition[1] + mGpio11ButtonPosition[3]) {
+            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]
+                = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT] == GPIO_STATE_CLEARED
+                ? GPIO_STATE_SET : GPIO_STATE_CLEARED;
+            System.println("  new mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]: " + mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]);
+            gpioDataUpdated = true;
+        }
+
+        if (gpioDataUpdated) {
             var profile = mDataModel.getActiveProfile();
-            profile.writeGpioDataByteArray([mLed4State]b);
+            if (mDataModel.isConnected() && profile != null) {
+                profile.writeGpioDataByteArray(mGpioDataByteArray);
+            }
 
             WatchUi.requestUpdate();
         }
