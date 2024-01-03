@@ -20,4 +20,4 @@ Reference:
 https://forums.garmin.com/developer/connect-iq/f/discussion/285079/can-t-build-or-debug-vscode-project
 
 
-Using a second dev-kit or nRF USB Dongle for BLE connectivity with the Connect IQ Simulator makes debugging much easier than debugging on watch hardware.  In order to do so, follow the instructions at https://developer.garmin.com/connect-iq/core-topics/bluetooth-low-energy/ to flash the appropriate firmware to the second dev-kit or nRF USB Dongle (most of our work done using an nRF USB Dongle).
+Using a second dev-kit or nRF USB Dongle for BLE connectivity with the Connect IQ Simulator makes debugging much easier than debugging on watch hardware.  Most of our work was done using the nRF USB Dongle as this makes the workflow easier as you can leave the dongle attached to your PC even when re-programming the dev-kit.  In order to do so, follow the instructions at https://developer.garmin.com/connect-iq/core-topics/bluetooth-low-energy/ to flash the appropriate firmware to the second dev-kit or nRF USB Dongle.
