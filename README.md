@@ -60,26 +60,46 @@ important info, tips, and steps that may need to be skipped!
 	* Recommend storing your key in <dev_root_folder>/ciq_developer_key folder for storing your key.
     * **Instructions**: https://developer.garmin.com/connect-iq/connect-iq-basics/getting-started/	
 7. **Sample CIQ Application**
-    * Create a <dev_root_folder>\ciq_projects folder and use the following commands to clone a 
-	copy of the report to your computer:
+    * After creating a <dev_root_folder>\ciq_projects folder. Use the following commands to clone a copy of this repo
+	to your computer:
 	```
 	cd  <dev_root_folder>/ciq_projects 
 	git  clone https://github.com/4djelliot/CIQ_CustomBleProfile.git DukeSampleApp
 	```	
 
-## BLE in the Connect IQ Simulator
+# Step 2: Build, Install and Run the Sample CIQ application
+Now that you have the hardware and software assembled, let's walk through the sample CIQ application
+in this repo and get it running on a Garmin smartwatch. At the end of these steps you should be able to
+toggle on and off an LED on the nRF52-DK board by tapping a button on the smartwatch. The sample uses
+Bluetooth for wireless communication.
+
+## Compile and Package Sample App
+  - Run on the simulator
+  - Run on device hardware
+
+## Configure BLE in the Connect IQ Simulator
 Connect IQ supports BLE connectivity from within its simulator via a second dev-kit or nRF52840 USB Dongle (dongle). This makes debugging much easier than debugging on watch hardware, as it allows you to use breakpoints in your Connect IQ code and avoid constantly flashing to hardware. Most of our work was done using the nRF USB Dongle, since you can leave the dongle attached to your PC even when re-programming the dev-kit. Follow the instructions below to flash the appropriate firmware to the nRF USB Dongle (see the [Connect IQ BLE Developer's Guide](https://developer.garmin.com/connect-iq/core-topics/bluetooth-low-energy/) for more information).
 
 1. Download the [nRF USB Dongle firmware for Connect IQ connectivity](https://developer.garmin.com/downloads/connect-iq/connectivity_1.0.0_usb_with_s132_5.1.0.zip). Extract the hex file from the downloaded zip file.
 2. Plug the nRF USB Dongle into your computer. If you have not previously programmed the dongle, it should enter the Bootloader state, indicated by a flashing red LED on the unit. It will not enumerate to a drive on your computer - this is expected.
 3. Open nRF Connect for Desktop -> Programmer
-4. Select "Select Device" and select the DFU bootloader from the dropdown.
 ![Initial Programmer View](readme_images/programmer_initial_view.png)
-5. Observe the memory layout for the dongle populate in the right side of the app.
+4. Click on "SELECT DEVICE".
+5. Select "Open DFU bootloader" from the dropdown list.
+![Select Bootloader](readme_images/nRF_Connect_Programmer_Bootloader.png)
+6. Observe the memory layout for the dongle populate in the right side of the app.
 ![Initial memory layout](readme_images/programmer_initial_memory_layout.png)
-6. Select "Add file" and select the hex file you downloaded in step 1. Observe the memory layout populate in the left side of the app.
+7. Select "Add file" and select the hex file you downloaded in step 1. Observe the memory layout populate in the left side of the app.
 ![View with HEX file](readme_images/programmer_view_with_ciq_hex.png)
-7. Select "Write". You should see a pop-up appear to indicate the programming is in process. Once this completes, your nRF USB Dongle is programmed and ready to communicate.
+8. Select "Write". You should see a pop-up appear to indicate the programming is in process. Once this completes, 
+your nRF USB dongle is programmed and ready to communicate. If the dongle does not enumerate or if you see
+the message "Failed to detect device after reboot. Timed out after 10 seconds." then follow the [reset instructions](#reset-nrf52840-usb-dongle) 
+below before continuing with these instructions.
+9. Open the Windows "Device Manager" and expand the "Ports (COM & LPT)" section.
+10. Make note of the COMn port number for the nRF52 dongle.
+![nRF COM port](readme_images/nRF_COM_port_device_manager.png)
+
+
 
 # Troubleshooting
 ## Visual Studio Code Extension
@@ -91,5 +111,14 @@ Connect IQ project not found. Be sure your project has a monkey.jungle file and 
 ```
 
 If so, use **File** -> **Add Folder** to Workspace and select the _DukeSampleApp_ folder.
-Reference:
-https://forums.garmin.com/developer/connect-iq/f/discussion/285079/can-t-build-or-debug-vscode-project
+Reference: https://forums.garmin.com/developer/connect-iq/f/discussion/285079/can-t-build-or-debug-vscode-project
+
+## Reset nRF52840 USB Dongle
+If the nRF52840 USB dongle does not enumerate then try the following:
+1. Remove the nRF52840 dongle from the USB port
+2. Insert the nRF52840 into a USB port making sure the dongle has the correct side up and is pushed in all the way.
+3. Press the reset button (sideways) for one second and then release the reset button.
+4. The dongle should enumerate and the red LED should pulsate.
+5. Configure the nRF52840 dongle using the [steps above](#configure-ble-in-the-connect-iq-simulator) by continuing with the click on "SELECT DEVICE" step.
+![nRF52840 reset button](readme_images/nRF52840_reset_dongle.png)
+
