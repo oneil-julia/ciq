@@ -17,6 +17,7 @@ nRF_CustomBleProfile guide you will need:
 * [Garmin USB-A Charging/Data Cable](https://www.garmin.com/en-US/p/696132/pn/010-12983-00)
 * [nRF52840 USB Dongle](https://www.nordicsemi.com/Products/Development-hardware/nRF52840-Dongle)
     * Used to enable Bluetooth connectivity for the Connect IQ device simulator
+* nRF52 DK that has been flashed with firmware from the [nRF_CustomBleProfile project](https://github.com/4djelliot/nRF_CustomBleProfile).
 * Computer (Windows 10 / Windows 11 were used in our demo)
 
 ## Computer Software
@@ -26,19 +27,16 @@ nRF_CustomBleProfile guide you will need:
 important info, tips, and steps that may need to be skipped!
 ### Install Software
 
-1. **Visual Studio Code**
-    * Monkey C is the programming language for CIQ applications. Visual Studio Code along with the Monkey C extension 
-	are used to develop applications for Garmin smrtwatches.
-    * **Download link**: https://code.visualstudio.com/docs/setup/setup-overview
-2. **Java 1.8.0**
+
+1. **Java 1.8.0**
     * Oracle Java&trade; Runtime Environment 8 (version 1.8.0 or higher) is required.
     * **Download link**: http://java.com/en/download/
-3. **Create a Garmin Connect Account**
+1. **Create a Garmin Connect Account**
     * You will need credentials from a Garmin Connect Account in order to setup the CIQ SDK in the next step. 
 	You can use an existing account or create one for free. Additional sign in help is 
 	available [here](https://support.garmin.com/en-US/?faq=v2sFtNt5j9AcJJy3Cvpon6).
     * **Connect Sign In**: https://connect.garmin.com/signin
-4. **Garmin Connect IQ SDK**
+1. **Garmin Connect IQ SDK**
     * The SDK Manager allows you to download different versions of the CIQ SDK and keep your device library up to date. 
 	You can also configure the SDK Manager to automatically download updates when they become available.
 	* This example was developed using Connect IQ SDK 6.4.1.
@@ -48,18 +46,21 @@ important info, tips, and steps that may need to be skipped!
 	* The SDK Manager will copy SDKs, the device library, sample code and fonts into the following folder on your Windows computer:
     \Users\<username>\AppData\Roaming\Garmin\ConnectIQ\
     * **Download link**: https://developer.garmin.com/connect-iq/sdk/
-5. **Monkey C Visual Studio Code Extension**
-    * The Monkey C extension adds support for using the Connect IQ SDK, including a syntax highlighting editor, build 
+1. **Visual Studio Code**
+    * You will use the Visual Studio Code IDE to write software for the Garmin watch.
+    * **Download link**: https://code.visualstudio.com/docs/setup/setup-overview
+1. **Monkey C Visual Studio Code Extension**
+    * Monkey C is the programming language for CIQ applications. The Monkey C extension adds support for using the Connect IQ SDK, including a syntax highlighting editor, build 
 	integration, and integrated debugger. The link below has instructions for installing the extension.
 	* More information about the extension is available on the 
 	[VisualStudio Marketplace](https://marketplace.visualstudio.com/items?itemName=garmin.monkey-c).
     * **Installation instructions**: https://developer.garmin.com/connect-iq/reference-guides/visual-studio-code-extension/
-6. **Generate a CIQ Developer Key**
+1. **Generate a CIQ Developer Key**
     * Your developer's key is used to sign CIQ applications. **IMPORTANT** don't lose your key. instructions
 	for generating a key can be found at the bottom of the page linked below.
 	* Recommend storing your key in <dev_root_folder>/ciq_developer_key folder for storing your key.
     * **Instructions**: https://developer.garmin.com/connect-iq/connect-iq-basics/getting-started/	
-7. **Sample CIQ Application**
+1. **Sample CIQ Application**
     * After creating a <dev_root_folder>\ciq_projects folder. Use the following commands to clone a copy of this repo
 	to your computer:
 	```
