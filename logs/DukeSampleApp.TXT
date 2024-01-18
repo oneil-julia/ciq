@@ -1,0 +1,1 @@
+Copy this file to the GARMIN\Apps\Logs\DukeSampleApp.txt folder on the watch to enable debug prints. (This line can be removed to make the file empty).
