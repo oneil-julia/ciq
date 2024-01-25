@@ -12,6 +12,7 @@ class DataModelFactory {
     // Dependencies
     private var _delegate as BluetoothDelegate;
     private var _profileManager as ProfileManager;
+    private var _phoneCommunication as PhoneCommunication;
 
     // Model Storage
     private var _scanDataModel as WeakReference?;
@@ -21,9 +22,10 @@ class DataModelFactory {
     //! Constructor
     //! @param delegate The BLE delegate to use for the models
     //! @param profileManager The profile manager to use for a profile model
-    public function initialize(delegate as BluetoothDelegate, profileManager as ProfileManager) {
+    public function initialize(delegate as BluetoothDelegate, profileManager as ProfileManager, phoneComm as PhoneCommunication) {
         _delegate = delegate;
         _profileManager = profileManager;
+        _phoneCommunication = phoneComm;
     }
 
     //! Get a scan data model instance
@@ -70,9 +72,15 @@ class DataModelFactory {
             }
         }
 
-        var dataModel = new $.EnvironmentProfileModel(_delegate, _profileManager, device);
+        var dataModel = new $.EnvironmentProfileModel(_delegate, _profileManager, device, _phoneCommunication);
         _envModel = dataModel.weak();
 
         return dataModel;
+    }
+
+    //! Get the PhoneCommunication instance
+    //! @return The current PhoneCommunication instance
+    public function GetPhoneCommunication() as PhoneCommunication {
+        return _phoneCommunication;
     }
 }

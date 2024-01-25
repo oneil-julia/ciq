@@ -15,10 +15,12 @@ class DukeSampleApp extends Application.AppBase {
     private var _profileManager as ProfileManager?;
     private var _modelFactory as DataModelFactory?;
     private var _viewController as ViewController?;
+    var _phoneCommunication as PhoneCommunication;
 
     //! Constructor
     public function initialize() {
-        AppBase.initialize();
+        AppBase.initialize();        
+        _phoneCommunication = new PhoneCommunication();
     }
 
     //! Handle app startup
@@ -26,7 +28,7 @@ class DukeSampleApp extends Application.AppBase {
     public function onStart(state as Dictionary?) as Void {
         _profileManager = new $.ProfileManager();
         _bleDelegate = new $.BluetoothDelegate(_profileManager as ProfileManager);
-        _modelFactory = new $.DataModelFactory(_bleDelegate as BluetoothDelegate, _profileManager as ProfileManager);
+        _modelFactory = new $.DataModelFactory(_bleDelegate as BluetoothDelegate, _profileManager as ProfileManager, _phoneCommunication as PhoneCommunication);
         _viewController = new $.ViewController(_modelFactory as DataModelFactory);
 
         BluetoothLowEnergy.setDelegate(_bleDelegate as BluetoothDelegate);

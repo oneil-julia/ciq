@@ -26,12 +26,12 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
     //! Handle new scan results being received
     //! @param scanResults An iterator of new scan results
     public function onScanResults(scanResults as Iterator) as Void {
-        System.println("onScanResults");
+        System.println("BLE: onScanResults");
         for (var result = scanResults.next(); result != null; result = scanResults.next()) {
             if (result instanceof ScanResult) {
-                System.println("Result is a scan result  " + result.getDeviceName());
+                System.println("BLE: Result is a scan result  " + result.getDeviceName());
                 if (contains(result.getServiceUuids(), _profileManager.DUKE_CUSTOM_SERVICE)) {
-                    System.println("Found custom service, calling broadcast");
+                    System.println("BLE: Found custom service, calling broadcast");
                     broadcastScanResult(result);
                 }
             }
@@ -42,7 +42,7 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
     //! @param device The device state that was changed
     //! @param state The state of the connection
     public function onConnectedStateChanged(device as Device, state as ConnectionState) as Void {
-        System.println("onConnectedStateChanged");
+        System.println("BLE: onConnectedStateChanged");
         var onConnection = _onConnection;
         if (null != onConnection) {
             if (onConnection.stillAlive()) {
@@ -55,6 +55,7 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
     //! @param descriptor The descriptor that was written
     //! @param status The BluetoothLowEnergy status indicating the result of the operation
     public function onDescriptorWrite(descriptor as Descriptor, status as Status) as Void {
+        System.println("BLE: onDescriptorWrite");
         var onDescriptorWrite = _onDescriptorWrite;
         if (null != onDescriptorWrite) {
             if (onDescriptorWrite.stillAlive()) {
@@ -67,12 +68,24 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
     //! @param char The characteristic that changed
     //! @param value The updated value of the characteristic
     public function onCharacteristicChanged(char as Characteristic, value as ByteArray) as Void {
+        System.println("BLE: onCharacteristicChanged: " + char);
         var onCharChanged = _onCharChanged;
         if (null != onCharChanged) {
             if (onCharChanged.stillAlive()) {
                 (onCharChanged.get() as EnvironmentProfileModel).onCharacteristicChanged(char, value);
             }
         }
+    }
+
+    //! Callback after Characteristic.requestWrite() is complete
+    public function onCharacteristicWrite(char as Characteristic, status as BluetoothLowEnergy.Status) as Void {
+        System.println("BLE: onCharacteristicWrite: " + char + " status = " + status);
+        // TODO - If there is something in the queue then dequeue the next item and write it 
+        // using Characteristic.requestWrite()
+    }
+
+    public function onProfileRegister(uuid as BluetoothLowEnergy.Uuid, status as BluetoothLowEnergy.Status) as Void {
+        System.println("BLE: onProfileRegister: " + uuid + " status = " + status);
     }
 
     //! Store a new model to manage scan results
@@ -100,6 +113,7 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
     }
 
     public function onScanStateChange(scanState as BluetoothLowEnergy.ScanState, status as BluetoothLowEnergy.Status) as Void {
+        System.println("BLE: onScanStateChange: " + scanState + " status = " + status);
         var onScanResult = _onScanResult;
         if (null != onScanResult) {
             if (onScanResult.stillAlive()) {
@@ -108,10 +122,24 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
         }
     }
 
+    //! Perform a write. If BLE is busy then queue the operation to run later
+    public function queueCharacteristicWrite(char as BluetoothLowEnergy.Characteristic, data as ByteArray) as Void {
+        System.println("BLE: queueCharacteristicWrite() called");
+        try {
+            if ( data != null && data.size() > 0) {
+                char.requestWrite(data, {:writeType=>BluetoothLowEnergy.WRITE_TYPE_WITH_RESPONSE});
+            }
+        }
+        catch (ex) {
+            System.println("BLE: queueCharacteristicWrite() Exception: " + ex.getErrorMessage());
+            // TODO: Failed to write, queue the operation to be run when BLE is no longer busy
+        }
+    }
+
     //! Broadcast a new scan result
     //! @param scanResult The new scan result
     private function broadcastScanResult(scanResult as ScanResult) as Void {
-        System.println("broadcastScanResult");
+        System.println("BLE: broadcastScanResult");
         var onScanResult = _onScanResult;
         if (null != onScanResult) {
             if (onScanResult.stillAlive()) {
@@ -133,4 +161,6 @@ class BluetoothDelegate extends BluetoothLowEnergy.BleDelegate {
 
         return false;
     }
+
+
 }

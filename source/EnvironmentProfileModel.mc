@@ -14,6 +14,8 @@ class EnvironmentProfileModel {
     private var _profileManager as ProfileManager;
     private var _pendingNotifies as Array<Characteristic>;
     private var _GpioCharacteristic as Characteristic;
+    private var _BluetoothDelegate as BluetoothDelegate;
+    private var _PhoneCommunication as PhoneCommunication;
 
     private var _custom_data_byte_array as ByteArray;
     private var _gpio_data_byte_array as ByteArray;
@@ -22,13 +24,16 @@ class EnvironmentProfileModel {
     //! @param delegate The BLE delegate for the model
     //! @param profileManager The profile manager for this model
     //! @param device The current device
-    public function initialize(delegate as BluetoothDelegate, profileManager as ProfileManager, device as Device) {
-        delegate.notifyDescriptorWrite(self);
-        delegate.notifyCharacteristicChanged(self);
+    public function initialize(delegate as BluetoothDelegate, profileManager as ProfileManager, device as Device, phoneComm as PhoneCommunication) {
+        _BluetoothDelegate = delegate;
+        _BluetoothDelegate.notifyDescriptorWrite(self);
+        _BluetoothDelegate.notifyCharacteristicChanged(self);
 
         _profileManager = profileManager;
         _service = device.getService(profileManager.DUKE_CUSTOM_SERVICE);
         _GpioCharacteristic = _service.getCharacteristic(_profileManager.DUKE_GPIO_CHARACTERISTIC);
+
+        _PhoneCommunication = phoneComm;
 
         _pendingNotifies = [] as Array<Characteristic>;
         _custom_data_byte_array = []b;
@@ -90,12 +95,9 @@ class EnvironmentProfileModel {
         return null;
     }
 
+    //! Update the GPIO data by writing to the BLE characteristic
     public function writeGpioDataByteArray(writeGpioDataByteArray as ByteArray) as Void {
-        System.println("writeGpioDataByteArray(" + writeGpioDataByteArray + ")");
-        if (writeGpioDataByteArray != null && writeGpioDataByteArray.size() > 0) {
-            _gpio_data_byte_array = []b;
-            _GpioCharacteristic.requestWrite(writeGpioDataByteArray, {:writeType=>BluetoothLowEnergy.WRITE_TYPE_DEFAULT});
-        }
+        _BluetoothDelegate.queueCharacteristicWrite(_GpioCharacteristic, writeGpioDataByteArray);
     }
 
     //! Write the next notification to the descriptor
@@ -138,8 +140,20 @@ class EnvironmentProfileModel {
     //! @param data The new custom data
     private function processLedData(data as ByteArray) as Void {
         System.println("processLedData(), data.size()=" + data.size());
+        var old_gpio_data = _gpio_data_byte_array;
         _gpio_data_byte_array = []b;
         _gpio_data_byte_array.addAll(data);
+
+        // Check for changes in LED state. Send the new state to the phone
+        // if the LED has changed
+        if ( ( _gpio_data_byte_array.size() > 0 && old_gpio_data.size() > 0
+               && _gpio_data_byte_array[DeviceView.GPIO_PAYLOAD_INDEX_LED4] != old_gpio_data[DeviceView.GPIO_PAYLOAD_INDEX_LED4] )
+             || (old_gpio_data.size() == 0 && _gpio_data_byte_array.size() > 0) ) {
+            var message = _gpio_data_byte_array[DeviceView.GPIO_PAYLOAD_INDEX_LED4] == DeviceView.LED_STATE_OFF ?
+                "LED4:state:off" : "LED4:state:on";
+            _PhoneCommunication.transmitMessageToPhone(message);
+        }
+
         WatchUi.requestUpdate();
     }
 }
