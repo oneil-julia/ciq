@@ -65,8 +65,38 @@ class DeviceView extends WatchUi.View {
     public function onUpdate(dc as Dc) as Void {
         System.println("onUpdate()");
 
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        //dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        var isGpioSet = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO12_INPUT] != GPIO_STATE_SET;
+        if(isGpioSet){
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_RED);
+        }
+        else{
+            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_GREEN);
+        }
         dc.clear();
+        
+        dc.setPenWidth(20);
+
+        var center = dc.getWidth() / 2;
+        var circleRadius = dc.getWidth() * 0.2;
+        var sqrt2 = 1.41421356237/2;
+        var offset = 5;
+        if(isGpioSet){
+            // draw a caution symbol
+            dc.drawCircle(center, center, circleRadius);
+            dc.drawLine(
+                center - circleRadius * sqrt2 + offset,
+                center - circleRadius * sqrt2 + offset,
+                center + circleRadius * sqrt2 - offset,
+                center + circleRadius * sqrt2 - offset
+            );
+        }
+        else{
+            // draw a check mark
+            dc.drawLine(center - circleRadius, center, center, center + circleRadius);
+            dc.drawLine(center, center + circleRadius, center + circleRadius, center - circleRadius);
+        }
+
 
         var isConnected = mDataModel.isConnected();
         var statusString;
