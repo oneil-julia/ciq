@@ -42,19 +42,17 @@ class ScanView extends WatchUi.View {
 
         if(!_scanDataModel.isScanning()) {
             // Update the next line of code to modify what is displayed on the watch
-            subtext = "Hold Menu Button\nto View Scan Menu\nhello from drew";
-            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_RED);
+            subtext = "Hold Menu Button\nto View Scan Menu";
         } else if (null != displayResult) {
             subtext = "Tap to Connect\nDevice: " + _scanDataModel.getDisplayIndex() + "/" + _scanDataModel.getResultCount() + "\nName:" + displayResult.getDeviceName() + "\nRSSI: " + displayResult.getRssi() + " dbm";
         } else {
-            dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_GREEN);
             subtext = "Scanning...";
         }
 
         var strDimenTitle = dc.getTextDimensions(title, Graphics.FONT_MEDIUM);
         var yOffset = dc.getHeight() * 0.10f;
 
-        //dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
         dc.drawText(dc.getWidth() / 2, yOffset, Graphics.FONT_MEDIUM, title, Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(dc.getWidth() / 2, yOffset + strDimenTitle[1], Graphics.FONT_SMALL, subtext, Graphics.TEXT_JUSTIFY_CENTER);
