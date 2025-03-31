@@ -240,4 +240,4 @@ Follow this steps to enable debug prints and direct the output to a file:
    You can do this by copying the file from <dev_root_folder>\ciq_projects\DukeSampleApp\logs\DukeSampleApp.txt
 1. Eject the smartwatch or remove the USB cable.
 1. Now, after you run the DukeSampleApp application, the debug prints will be written to this file.
-	
+	# BioRise_Main
