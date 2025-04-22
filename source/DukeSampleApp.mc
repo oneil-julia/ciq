@@ -49,7 +49,10 @@ class DukeSampleApp extends Application.AppBase {
     //! Return the initial views for the app
     //! @return Array Pair [View, InputDelegate]
     public function getInitialView() as [Views] or [Views, InputDelegates] {
-        return _viewController.getInitialView();
+        var scanDataModel = _modelFactory.getScanDataModel();
+        var scanView = new ScanView(scanDataModel);
+        var scanDelegate = new ScanDelegate(scanDataModel, _viewController, _modelFactory);
+        return [scanView, scanDelegate];
     }
 
 }

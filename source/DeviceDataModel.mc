@@ -48,7 +48,6 @@ class DeviceDataModel {
     public function pair() as Void {
         BluetoothLowEnergy.setScanState(BluetoothLowEnergy.SCAN_STATE_OFF);
         _device = BluetoothLowEnergy.pairDevice(_scanResult);
-        
     }
 
     //! Unpair the current device

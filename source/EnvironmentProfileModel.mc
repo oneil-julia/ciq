@@ -39,6 +39,8 @@ class EnvironmentProfileModel {
         _custom_data_byte_array = []b;
         _gpio_data_byte_array = []b;
 
+        _BluetoothDelegate.queueCharacteristicWrite(_GpioCharacteristic, _gpio_data_byte_array.add(7));
+
         var service = _service;
         if (service != null) {
             var characteristics = service.getCharacteristics();
