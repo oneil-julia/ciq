@@ -68,6 +68,8 @@ class EnvironmentProfileModel {
         }
     }
 
+    public function getGpioCharacteristic() as Characteristic{ return _GpioCharacteristic; }
+
     //! Handle the completion of a write operation on a descriptor
     //! @param descriptor The descriptor that was written
     //! @param status The BluetoothLowEnergy status indicating the result of the operation

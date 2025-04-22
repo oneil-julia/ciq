@@ -7,6 +7,7 @@
 import Toybox.BluetoothLowEnergy;
 import Toybox.Lang;
 import Toybox.WatchUi;
+import Toybox.StringUtil;
 
 class DeviceDataModel {
     private var _scanResult as ScanResult;
@@ -47,6 +48,7 @@ class DeviceDataModel {
     public function pair() as Void {
         BluetoothLowEnergy.setScanState(BluetoothLowEnergy.SCAN_STATE_OFF);
         _device = BluetoothLowEnergy.pairDevice(_scanResult);
+        
     }
 
     //! Unpair the current device
@@ -82,6 +84,7 @@ class DeviceDataModel {
     private function procDeviceConnected() as Void {
         if (_device != null) {
             _environmentProfile = _dataModelFactory.getEnvironmentModel(_device);
+
         }
     }
 }

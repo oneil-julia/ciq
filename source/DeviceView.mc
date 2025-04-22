@@ -247,37 +247,23 @@ class DeviceView extends WatchUi.View {
     }
 
     // Using a Selectable / Button Type would be better, but this will work as a hacky solution for now.
-    public function onTapEvent(x as Number, y as Number) as Void {
-        System.println("onTapEvent()");
-        var gpioDataUpdated = false;
 
-        if (x >= mLedButtonPosition[0] && x <= mLedButtonPosition[0] + mLedButtonPosition[2] &&
-            y >= mLedButtonPosition[1] && y <= mLedButtonPosition[1] + mLedButtonPosition[3]) {
-            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]
-                = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4] == LED_STATE_OFF
-                ? LED_STATE_ON : LED_STATE_OFF;
-            System.println("  new mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]: " + mGpioDataByteArray[GPIO_PAYLOAD_INDEX_LED4]);
-            gpioDataUpdated = true;
-        }
+        public function onTapEvent(x as Number, y as Number) as Void {
+            System.println("onTapEvent(): sending 'hello'");
 
-        if (x >= mGpio11ButtonPosition[0] && x <= mGpio11ButtonPosition[0] + mGpio11ButtonPosition[2] &&
-            y >= mGpio11ButtonPosition[1] && y <= mGpio11ButtonPosition[1] + mGpio11ButtonPosition[3]) {
-            mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]
-                = mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT] == GPIO_STATE_CLEARED
-                ? GPIO_STATE_SET : GPIO_STATE_CLEARED;
-            System.println("  new mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]: " + mGpioDataByteArray[GPIO_PAYLOAD_INDEX_GPIO11_OUTPUT]);
-            gpioDataUpdated = true;
-        }
-
-        if (gpioDataUpdated) {
             var profile = mDataModel.getActiveProfile();
             if (mDataModel.isConnected() && profile != null) {
-                profile.writeGpioDataByteArray(mGpioDataByteArray);
+                var message = "hello";
+                var byteArray = stringToByteArray(message);
+                profile.writeGpioDataByteArray(byteArray);
+                System.println("Sent: " + message);
+            } else {
+                System.println("Device not connected or profile is null");
             }
 
             WatchUi.requestUpdate();
         }
-    }
+
 
     // Call this function to set a GPIO state. The new state is compared to the
     // existing state and if a change is being made then the full GPIO data array

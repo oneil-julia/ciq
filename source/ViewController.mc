@@ -35,7 +35,7 @@ class ViewController {
     public function pushDeviceView(scanResult as ScanResult) as Void {
         var deviceDataModel = _modelFactory.getDeviceDataModel(scanResult);
         var deviceView = new $.DeviceView(deviceDataModel);
-        _modelFactory.GetPhoneCommunication().setDeviceView(deviceView);
+        //_modelFactory.GetPhoneCommunication().setDeviceView(deviceView);
 
         WatchUi.pushView(deviceView, new $.DeviceDelegate(deviceDataModel, deviceView), WatchUi.SLIDE_UP);
     }

@@ -6,6 +6,7 @@
             <iq:product id="vivoactive5"/>
         </iq:products>
         <iq:permissions>
+            <iq:uses-permission id="Ant"/>
             <iq:uses-permission id="BluetoothLowEnergy"/>
             <iq:uses-permission id="Communications"/>
         </iq:permissions>
